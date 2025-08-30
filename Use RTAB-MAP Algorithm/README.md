@@ -14,7 +14,7 @@ via **/mavros/vision_pose/pose** to improve stability.
 - Use ar_track_alvar to detect the AR/QR marker on the landing pad and obtain the **relative pose** for alignment and convergence.
 - Run RTAB-MAP (RGB-D) for online **mapping & localization**, using MAVROS local odometry (/mavros/local_position/odom) as odometry input;
   forward RTAB-MAP **localization poses** to PX4 via /mavros/vision_pose/pose to improve controller stability and robustness to temporary detection loss.
-- Landing controller (state machine + PID): WAITING → CHECKING → PREPARE → SEARCH → LANDING → LANDOVER → DONE,
+- Landing controller (state machine + PID): **WAITING → CHECKING → PREPARE → SEARCH → LANDING → LANDOVER → DONE**,
   with **lost-marker descent**, **robust landing criteria**, **final braking and optional auto disarm/termination**, etc.
 - Supports both **aggregated launch** and **step-by-step launch**, with keyboard teleop and RViz for visualization.
 
