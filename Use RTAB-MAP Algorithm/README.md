@@ -1,3 +1,6 @@
+RTAB-MAP + QR-Code Autonomous Landing (Full README)
+=================================================
+
 This document describes how to use **Gazebo + PX4 SITL** to detect an AR/QR marker with a **downward-facing camera** for precise landing,
 and how to enable **RTAB-MAP (RGB-D) mapping & localization** during **takeoff/flight**, feeding poses to PX4
 via **/mavros/vision_pose/pose** to improve stability.
