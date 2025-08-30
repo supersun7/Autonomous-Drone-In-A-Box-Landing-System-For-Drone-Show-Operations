@@ -1,0 +1,33 @@
+<launch>
+  <!-- 将相机挂在 base_link_frd（FRD）上 -->
+  <node pkg="tf" name="tf_depthCamera" type="static_transform_publisher"
+        args="0 0 0 -1.57 0 -1.57 base_link_frd depth_camera_link 100"/>
+
+  <arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="0"/>
+  <arg name="R" default="0"/>
+  <arg name="P" default="0"/>
+  <arg name="Y" default="0"/>
+
+  <arg name="world" default="$(find simulation)/worlds/empty.world"/>
+  <arg name="sdf"   default="$(find simulation)/models/iris_depth_camera_down/iris_depth_camera_down.sdf"/>
+  <arg name="verbose" default="false"/>
+  <arg name="debug"   default="false"/>
+
+  <!-- 用绝对路径包含 PX4 的 SITL 启动文件（示例路径，按你的环境修改） -->
+  <arg name="px4_launch" default="$(env HOME)/project/volans/Firmware/launch/mavros_posix_sitl.launch"/>
+
+  <include file="$(arg px4_launch)">
+    <arg name="x" value="$(arg x)"/>
+    <arg name="y" value="$(arg y)"/>
+    <arg name="z" value="$(arg z)"/>
+    <arg name="R" value="$(arg R)"/>
+    <arg name="P" value="$(arg P)"/>
+    <arg name="Y" value="$(arg Y)"/>
+    <arg name="sdf" value="$(arg sdf)"/>
+    <arg name="verbose" value="$(arg verbose)"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="world" value="$(arg world)"/>
+  </include>
+</launch>

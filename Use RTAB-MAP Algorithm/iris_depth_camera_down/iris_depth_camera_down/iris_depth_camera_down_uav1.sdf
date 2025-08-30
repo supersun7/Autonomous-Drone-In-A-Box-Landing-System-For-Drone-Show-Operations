@@ -1,0 +1,66 @@
+<sdf version="1.5">
+  <model name="iris_depth_camera_down_uav1">
+
+    <!-- 机体（Iris） -->
+    <include>
+      <uri>model://iris</uri>
+    </include>
+
+    <!-- 向下视相机（挂在机体底部，绕Y轴+90°朝下） -->
+    <link name="depth_camera_link">
+      <!-- 相机相对于机体的位姿：x y z R P Y -->
+      <pose>0 0 -0.05 0 1.5708 0</pose>
+
+      <!-- 简单惯性，避免 Gazebo 报空惯性 -->
+      <inertial>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>1e-5</ixx><iyy>1e-5</iyy><izz>1e-5</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+
+      <!-- RGB 相机（二维码识别足够使用） -->
+      <sensor name="rgb_camera" type="camera">
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+        <camera>
+          <horizontal_fov>1.047</horizontal_fov> <!-- ~60deg -->
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.05</near>
+            <far>50</far>
+          </clip>
+        </camera>
+
+        <!-- Gazebo-ROS 相机插件（命名空间 /uav1） -->
+        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+          <!-- 关键：命名空间；最终话题将是 /uav1/camera/... -->
+          <robotNamespace>/uav1</robotNamespace>
+
+          <!-- 相机节点名（相对名） -->
+          <cameraName>camera</cameraName>
+
+          <!-- TF 帧名唯一化，避免两机冲突 -->
+          <frameName>uav1/depth_camera_link</frameName>
+
+          <!-- 话题名（相对名） -->
+          <imageTopicName>rgb/image_raw</imageTopicName>
+          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+        </plugin>
+      </sensor>
+    </link>
+
+    <!-- 刚性连接相机到机体 -->
+    <joint name="depth_camera_joint" type="fixed">
+      <parent>iris::base_link</parent>
+      <child>depth_camera_link</child>
+    </joint>
+
+  </model>
+</sdf>
+

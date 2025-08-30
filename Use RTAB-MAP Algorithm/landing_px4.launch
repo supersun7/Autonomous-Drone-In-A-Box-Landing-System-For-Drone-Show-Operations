@@ -1,0 +1,85 @@
+<launch>
+  <!-- 全局使用仿真时钟 -->
+  <param name="/use_sim_time" value="true"/>
+
+  <!-- ===== 世界与仿真 ===== -->
+  <arg name="world_path" default="$(find simulation)/worlds/landing_place.world"/>
+
+  <include file="$(find simulation)/launch/px4/camera_down_px4.launch">
+    <arg name="world" value="$(arg world_path)"/>
+  </include>
+
+  <!-- ===== 让 MAVROS 同步发布 TF：odom -> base_link_frd ===== -->
+  <rosparam>
+mavros:
+  local_position:
+    tf:
+      send: true
+      frame_id: odom
+      child_frame_id: base_link_frd
+  </rosparam>
+
+  <!-- ===== AR 标签识别 ===== -->
+  <include file="$(find ros_vision)/launch/ar_track_camera.launch"/>
+
+  <!-- ===== RTAB-Map（RGB-D 建图） =====
+       关键修改：frame_id 用 FLU 的 base_link；不在此处发布相机静态 TF。 -->
+  <include file="$(find simulation)/launch/Demo/px4_quadrotor/rtabmap_rgbd.launch">
+    <!-- 相机话题 -->
+    <arg name="rgb_topic"     value="/camera/rgb/image_raw"/>
+    <arg name="depth_topic"   value="/camera/depth/image_raw"/>
+    <arg name="camera_info"   value="/camera/rgb/camera_info"/>
+
+    <!-- TF / 里程计（frame_id 改为 base_link） -->
+    <arg name="frame_id"      value="base_link"/>
+    <arg name="camera_frame"  value="depth_camera_link"/>
+    <arg name="odom_frame_id" value="odom"/>
+    <arg name="map_frame_id"  value="map"/>
+    <arg name="odom_topic"    value="/mavros/local_position/odom"/>
+
+    <arg name="use_sim_time"   value="true"/>
+    <arg name="publish_cam_tf" value="false"/>
+  </include>
+
+  <!-- （可选，建议）RTAB-Map 稳定参数：低空/近平面更稳 -->
+  <rosparam ns="rtabmap">
+    Reg/Force3DoF: true
+    RGBD/LinearUpdate: 0.05
+    RGBD/AngularUpdate: 0.05
+  </rosparam>
+  <rosparam ns="rgbd_odometry">
+    Reg/Force3DoF: true
+  </rosparam>
+
+  <!-- ===== FRD(base_link_frd) -> FLU(base_link) 静态 TF（绕X轴180°） ===== -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="frd_to_flu"
+        args="0 0 0 1 0 0 0 base_link_frd base_link"/>
+
+  <!-- ===== 降落控制（你的原参数） ===== -->
+  <include file="$(find px4_control)/launch/landing.launch">
+    <arg name="search_alt_" value="5"/>
+    <arg name="markers_id_" value="4"/>
+    <arg name="desire_pose_x" value="0"/>
+    <arg name="desire_pose_y" value="0"/>
+    <arg name="desire_pose_z" value="0.1"/>
+    <arg name="desire_yaw_" value="1.4"/>
+    <arg name="PidXY_p" value="1"/>
+    <arg name="PidXY_d" value="0.1"/>
+    <arg name="PidXY_i" value="0.02"/>
+    <arg name="PidZ_p" value="0.2"/>
+    <arg name="PidZ_d" value="0.1"/>
+    <arg name="PidZ_i" value="0"/>
+    <arg name="PidYaw_p" value="0.1"/>
+    <arg name="PidYaw_d" value="0"/>
+    <arg name="PidYaw_i" value="0"/>
+  </include>
+
+  <!-- 键盘控制台（保留你原来的手动控制） -->
+  <node pkg="simulation" type="keyboard_control_px4.py"
+        name="keyboard_control_px4" output="screen"
+        launch-prefix="gnome-terminal --tab -e"/>
+
+  <!-- RViz（可换成你的 .rviz 绝对路径） -->
+  <node pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find ros_vision)/config/ar_track_camera.rviz"/>
+</launch>

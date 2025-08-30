@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<sdf version='1.6'>
+  <model name='iris_depth_camera_down_uav2'>
+    <include><uri>model://iris_1</uri></include>
+    <include>
+      <uri>model://depth_camera_uav2</uri>
+      <pose>0 0 -0.05 0 1.5708 0</pose>
+    </include>
+    <joint name="depth_cam_joint" type="fixed">
+      <child>depth_camera_uav2::link</child>
+      <parent>iris_1::base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+  </model>
+</sdf>
