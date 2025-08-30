@@ -57,3 +57,5 @@ src/
    roslaunch <your_pkg> landing_px4.launch
 
 3) Enter "rviz" in the terminal to manually enable it
+
+   Ctrl + C to exit.
